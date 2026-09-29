@@ -1,0 +1,37 @@
+{
+  "KursleiterDialog.tsx": {
+    "kursleiter_firstname": "z. B. Anna",
+    "kursleiter_lastname": "z. B. Schmidt",
+    "email": "z. B. anna@example.com",
+    "telefon": "z. B. 030 123 4567",
+    "spezialisierungen": "z. B. Hatha Yoga, Meditation",
+    "kurzbiografie": "Deine Erfahrung, Qualifikationen, spezielle Fähigkeiten...",
+    "status": "Ist dieser Lehrer aktiv?"
+  },
+  "KurseDialog.tsx": {
+    "beschreibung": "Besonderheiten, Inhalt, Anforderungen...",
+    "yogastil": "Welcher Yoga-Stil?",
+    "niveau": "Für welches Erfahrungslevel?",
+    "kursleiter": "Welcher Lehrer unterrichtet?",
+    "titel": "z. B. Entspanntes Hatha am Morgen",
+    "startzeit": "Wann beginnt der Kurs?",
+    "dauer_minuten": "z. B. 60",
+    "ort": "z. B. Studio 1",
+    "max_teilnehmer": "z. B. 12",
+    "preis": "z. B. 15,00",
+    "kursstatus": "Status des Kurses?"
+  },
+  "AnmeldungenDialog.tsx": {
+    "kurs": "Welcher Kurs?",
+    "teilnehmer_firstname": "z. B. Maria",
+    "teilnehmer_lastname": "z. B. Müller",
+    "email": "z. B. maria@example.com",
+    "telefon": "z. B. 040 987 6543",
+    "erfahrung": "Wie viel Yoga-Erfahrung?",
+    "gesundheitshinweise": "Verletzungen, chronische Erkrankungen, Einschränkungen...",
+    "bemerkungen": "Besondere Wünsche, Notizen...",
+    "teilnahmebedingungen": "Akzeptieren?",
+    "anmeldedatum": "Anmeldedatum heute?",
+    "anmeldestatus": "Angemeldet oder Warteliste?"
+  }
+}

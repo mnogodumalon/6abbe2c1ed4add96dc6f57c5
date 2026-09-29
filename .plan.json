@@ -1,0 +1,283 @@
+{
+  "version": 1,
+  "language": "de",
+  "understanding": {
+    "summary": "Ein Yoga-Studio verwaltet Kurse und Kursleiter intern und ermöglicht Teilnehmern, sich über eine öffentliche Seite für Kurse anzumelden. Intern pflegt das Team Kursleiterprofile und Kurse; Teilnehmer sehen offene Kurse und melden sich selbst an.",
+    "roles": [
+      "Studio-Mitarbeiter: pflegt Kursleiter und Kurse, verwaltet Anmeldungen",
+      "Teilnehmer (anonym): sieht das Kursangebot und meldet sich online an"
+    ],
+    "main_tasks": [
+      "Kursleiter anlegen und verwalten",
+      "Kurse planen und öffnen",
+      "Anmeldungen von Teilnehmern entgegennehmen und verwalten",
+      "Kurs automatisch als ausgebucht markieren wenn Plätze voll",
+      "Tagesaktuelle Anmeldezahlen im Blick behalten"
+    ],
+    "platform_roles": [
+      {
+        "persona": "Studio-Mitarbeiter",
+        "role": "datenverarbeitung",
+        "apps": [
+          "kursleiter",
+          "kurse",
+          "anmeldungen"
+        ]
+      },
+      {
+        "persona": "Administrator",
+        "role": "administrator",
+        "apps": [
+          "kursleiter",
+          "kurse",
+          "anmeldungen"
+        ]
+      }
+    ]
+  },
+  "flows": [
+    {
+      "slug": "kurs-anlegen",
+      "label": {
+        "de": "Kurs anlegen",
+        "en": "Create class"
+      },
+      "description": "Legt einen neuen Kurs an und weist einen Kursleiter zu. Der Status wird automatisch auf 'Geplant' gesetzt.",
+      "priority": "must",
+      "writes": [
+        {
+          "entity": "kurse",
+          "op": "create",
+          "when": "always",
+          "fields": {
+            "titel": "user",
+            "yogastil": "user",
+            "niveau": "user",
+            "kursleiter": "picked",
+            "startzeit": "user",
+            "dauer_minuten": "user",
+            "ort": "user",
+            "max_teilnehmer": "user",
+            "preis": "user",
+            "beschreibung": "user",
+            "kursstatus": "fixed:geplant"
+          },
+          "needs": {}
+        }
+      ],
+      "required": [],
+      "brief": "# Flow `kurs-anlegen` — Kurs anlegen\nLegt einen neuen Kurs an und weist einen Kursleiter zu. Der Status wird automatisch auf 'Geplant' gesetzt.\n\n## Your hook — import it, never rebuild what it owns\n`import { useKursAnlegenFlow } from '@/lib/journey/flows/KursAnlegen';` — generated from the Schreibliste below. It OWNS the form(s), one record search per picked field (columns and filter from the plan) and the submit plan with every fixed and derived value. You compose: `flow.forms.<entity>` for <Bound>/<Field>, `{...flow.picks.<field>.select} {...flow.pick('<field>')}` (or `flow.pickMany` for a multi pick) for <EntitySelectStep>, `flow.validateStep(n)` in StepNav.onNext, `flow.submit` + `flow.formList` for SummaryStep/SuccessStep, `flow.reset()`. Options: `steps` (field → step), `items` (how a hit reads, per pick: kursleiter), `initial`, `messages`. The hook's docblock in .lane-context.md shows the exact call. Never import servicePort, useStepForm, useJourneySubmit, useRecordSearch or useDashboardData in this page — check-intents refuses a page that uses the hook and any of them.\n\n## Steps (in this order)\n1. Kurstitel, Yoga-Stil, Niveau und Kursleiter eingeben\n2. Datum, Uhrzeit, Dauer und Ort festlegen\n3. Maximale Teilnehmerzahl und Preis angeben\n\n## Schreibliste — the ONLY writes this flow makes (the gate compares your plan steps with this list)\n- creates `kurse`:\n    - `titel`: the user enters it (bind it through the layer: form.field/…)\n    - `yogastil`: the user enters it (bind it through the layer: form.field/…)\n    - `niveau`: the user enters it (bind it through the layer: form.field/…)\n    - `kursleiter`: from the record the user picks in this flow\n    - `startzeit`: the user enters it (bind it through the layer: form.field/…)\n    - `dauer_minuten`: the user enters it (bind it through the layer: form.field/…)\n    - `ort`: the user enters it (bind it through the layer: form.field/…)\n    - `max_teilnehmer`: the user enters it (bind it through the layer: form.field/…)\n    - `preis`: the user enters it (bind it through the layer: form.field/…)\n    - `beschreibung`: the user enters it (bind it through the layer: form.field/…)\n    - `kursstatus`: fixed value `geplant` — set it in the plan step's values, never ask\n\n## Reads\n- `kursleiter` columns kursleiter_firstname, kursleiter_lastname, status\n\n## Success page\n- shows: `kurse.titel`, `kurse.startzeit`, `kurse.kursstatus`\n- next flows to offer: `kurs-oeffnen`\n\n## Never write these — another flow or a tool owns them\n- `anmeldungen.anmeldestatus` (owner: tool `anmeldestatus-initialisieren`)\n"
+    },
+    {
+      "slug": "kurs-oeffnen",
+      "label": {
+        "de": "Kurs zur Anmeldung öffnen",
+        "en": "Open class for registration"
+      },
+      "description": "Setzt den Status eines geplanten Kurses auf 'Anmeldung offen', damit Teilnehmer sich anmelden können.",
+      "priority": "must",
+      "writes": [
+        {
+          "entity": "kurse",
+          "op": "update",
+          "when": "always",
+          "fields": {
+            "kursstatus": "fixed:offen"
+          },
+          "needs": {}
+        }
+      ],
+      "required": [],
+      "brief": "# Flow `kurs-oeffnen` — Kurs zur Anmeldung öffnen\nSetzt den Status eines geplanten Kurses auf 'Anmeldung offen', damit Teilnehmer sich anmelden können.\n\n## Your hook — import it, never rebuild what it owns\n`import { useKursOeffnenFlow } from '@/lib/journey/flows/KursOeffnen';` — generated from the Schreibliste below. It OWNS the form(s), one record search per picked field (columns and filter from the plan) and the submit plan with every fixed and derived value. You compose: `flow.forms.<entity>` for <Bound>/<Field>, `{...flow.picks.<field>.select} {...flow.pick('<field>')}` (or `flow.pickMany` for a multi pick) for <EntitySelectStep>, `flow.validateStep(n)` in StepNav.onNext, `flow.submit` + `flow.formList` for SummaryStep/SuccessStep, `flow.reset()`. Options: `steps` (field → step), `items` (how a hit reads, per pick), `initial`, `messages`. The hook's docblock in .lane-context.md shows the exact call. This flow CHANGES a record of `kurse`: `{...flow.picks.kurse.select} {...flow.pick('kurse')}` picks it, the hook prefills the form with its current values and updates THAT record — never a create step, never a list from useDashboardData. Never import servicePort, useStepForm, useJourneySubmit, useRecordSearch or useDashboardData in this page — check-intents refuses a page that uses the hook and any of them.\n\n## Steps (in this order)\n1. Kurs auswählen\n2. Status auf 'Anmeldung offen' setzen\n\n## Schreibliste — the ONLY writes this flow makes (the gate compares your plan steps with this list)\n- updates `kurse`:\n    - `kursstatus`: fixed value `offen` — set it in the plan step's values, never ask\n\n## Reads\n- `kurse` columns titel, startzeit, kursstatus, max_teilnehmer\n\n## Success page\n- shows: `kurse.titel`, `kurse.kursstatus`\n\n## Never write these — another flow or a tool owns them\n- `kurse.titel` (owner: intent `kurs-anlegen`)\n- `kurse.yogastil` (owner: intent `kurs-anlegen`)\n- `kurse.niveau` (owner: intent `kurs-anlegen`)\n- `kurse.kursleiter` (owner: intent `kurs-anlegen`)\n- `kurse.startzeit` (owner: intent `kurs-anlegen`)\n- `kurse.dauer_minuten` (owner: intent `kurs-anlegen`)\n- `kurse.ort` (owner: intent `kurs-anlegen`)\n- `kurse.max_teilnehmer` (owner: intent `kurs-anlegen`)\n- `kurse.preis` (owner: intent `kurs-anlegen`)\n- `kurse.beschreibung` (owner: intent `kurs-anlegen`)\n- `anmeldungen.anmeldestatus` (owner: tool `anmeldestatus-initialisieren`)\n"
+    },
+    {
+      "slug": "anmeldung-verwalten",
+      "label": {
+        "de": "Anmeldung verwalten",
+        "en": "Manage registration"
+      },
+      "description": "Ändert den Status einer bestehenden Anmeldung, z. B. von der Warteliste auf angemeldet oder auf storniert.",
+      "priority": "must",
+      "writes": [
+        {
+          "entity": "anmeldungen",
+          "op": "update",
+          "when": "always",
+          "fields": {},
+          "needs": {}
+        }
+      ],
+      "required": [],
+      "brief": "# Flow `anmeldung-verwalten` — Anmeldung verwalten\nÄndert den Status einer bestehenden Anmeldung, z. B. von der Warteliste auf angemeldet oder auf storniert.\n\n## Your hook — import it, never rebuild what it owns\n`import { useAnmeldungVerwaltenFlow } from '@/lib/journey/flows/AnmeldungVerwalten';` — generated from the Schreibliste below. It OWNS the form(s), one record search per picked field (columns and filter from the plan) and the submit plan with every fixed and derived value. You compose: `flow.forms.<entity>` for <Bound>/<Field>, `{...flow.picks.<field>.select} {...flow.pick('<field>')}` (or `flow.pickMany` for a multi pick) for <EntitySelectStep>, `flow.validateStep(n)` in StepNav.onNext, `flow.submit` + `flow.formList` for SummaryStep/SuccessStep, `flow.reset()`. Options: `steps` (field → step), `items` (how a hit reads, per pick), `initial`, `messages`. The hook's docblock in .lane-context.md shows the exact call. This flow CHANGES a record of `anmeldungen`: `{...flow.picks.anmeldungen.select} {...flow.pick('anmeldungen')}` picks it, the hook prefills the form with its current values and updates THAT record — never a create step, never a list from useDashboardData. Never import servicePort, useStepForm, useJourneySubmit, useRecordSearch or useDashboardData in this page — check-intents refuses a page that uses the hook and any of them.\n\n## Steps (in this order)\n1. Anmeldung auswählen\n2. Neuen Anmeldestatus wählen\n\n## Schreibliste — the ONLY writes this flow makes (the gate compares your plan steps with this list)\n- updates `anmeldungen`:\n\n## Reads\n- `anmeldungen` columns teilnehmer_firstname, teilnehmer_lastname, email, kurs, anmeldestatus\n\n## Success page\n- shows: `anmeldungen.teilnehmer_lastname`, `anmeldungen.anmeldestatus`\n\n## Never write these — another flow or a tool owns them\n- `kurse.titel` (owner: intent `kurs-anlegen`)\n- `kurse.yogastil` (owner: intent `kurs-anlegen`)\n- `kurse.niveau` (owner: intent `kurs-anlegen`)\n- `kurse.kursleiter` (owner: intent `kurs-anlegen`)\n- `kurse.startzeit` (owner: intent `kurs-anlegen`)\n- `kurse.dauer_minuten` (owner: intent `kurs-anlegen`)\n- `kurse.ort` (owner: intent `kurs-anlegen`)\n- `kurse.max_teilnehmer` (owner: intent `kurs-anlegen`)\n- `kurse.preis` (owner: intent `kurs-anlegen`)\n- `kurse.beschreibung` (owner: intent `kurs-anlegen`)\n- `kurse.kursstatus` (owner: intent `kurs-anlegen`)\n- `anmeldungen.anmeldestatus` (owner: tool `anmeldestatus-initialisieren`)\n"
+    }
+  ],
+  "public_pages": [
+    {
+      "slug": "kursangebot",
+      "purpose": "Zeigt anonymen Besuchern alle offenen Kurse mit Kursleiter, Stil, Niveau, Zeit und Preis.",
+      "publish": false,
+      "lists": [
+        {
+          "entity": "kurse",
+          "columns": [
+            "titel",
+            "yogastil",
+            "niveau",
+            "kursleiter",
+            "startzeit",
+            "dauer_minuten",
+            "ort",
+            "preis",
+            "max_teilnehmer"
+          ],
+          "filter": {
+            "mode": "all",
+            "conditions": [
+              {
+                "field": "kursstatus",
+                "op": "eq",
+                "value": "offen"
+              }
+            ]
+          },
+          "max_records": null
+        }
+      ],
+      "creates": [],
+      "brief": "# Public page `kursangebot`\nZeigt anonymen Besuchern alle offenen Kurse mit Kursleiter, Stil, Niveau, Zeit und Preis.\n\n## Lists (declare exactly these in the surface)\n- `kurse`: columns `titel`, `yogastil`, `niveau`, `kursleiter`, `startzeit`, `dauer_minuten`, `ort`, `preis`, `max_teilnehmer`, filter {\"mode\": \"all\", \"conditions\": [{\"field\": \"kursstatus\", \"op\": \"eq\", \"value\": \"offen\"}]}\n\nPublish: no (draft — the owner publishes)\n"
+    },
+    {
+      "slug": "kurs-anmeldung",
+      "purpose": "Ermöglicht anonymen Besuchern, sich für einen offenen Kurs anzumelden. Teilnehmer wählen den Kurs und füllen ihre Daten aus.",
+      "publish": false,
+      "lists": [
+        {
+          "entity": "kurse",
+          "columns": [
+            "titel",
+            "yogastil",
+            "niveau",
+            "startzeit",
+            "ort",
+            "preis"
+          ],
+          "filter": {
+            "mode": "all",
+            "conditions": [
+              {
+                "field": "kursstatus",
+                "op": "eq",
+                "value": "offen"
+              }
+            ]
+          },
+          "max_records": null
+        }
+      ],
+      "creates": [
+        {
+          "entity": "anmeldungen",
+          "fields": {
+            "kurs": "picked",
+            "teilnehmer_firstname": "user",
+            "teilnehmer_lastname": "user",
+            "email": "user",
+            "telefon": "user",
+            "erfahrung": "user",
+            "gesundheitshinweise": "user",
+            "bemerkungen": "user",
+            "teilnahmebedingungen": "user",
+            "anmeldedatum": "derived:today"
+          },
+          "fixed": {
+            "anmeldestatus": "angemeldet"
+          }
+        }
+      ],
+      "brief": "# Public page `kurs-anmeldung`\nErmöglicht anonymen Besuchern, sich für einen offenen Kurs anzumelden. Teilnehmer wählen den Kurs und füllen ihre Daten aus.\n\n## Lists (declare exactly these in the surface)\n- `kurse`: columns `titel`, `yogastil`, `niveau`, `startzeit`, `ort`, `preis`, filter {\"mode\": \"all\", \"conditions\": [{\"field\": \"kursstatus\", \"op\": \"eq\", \"value\": \"offen\"}]}\n\n## Creates (declare exactly these in the surface)\n- `anmeldungen`: visitor fields `kurs`, `teilnehmer_firstname`, `teilnehmer_lastname`, `email`, `telefon`, `erfahrung`, `gesundheitshinweise`, `bemerkungen`, `teilnahmebedingungen`, `anmeldedatum`; preset_fields {\"anmeldestatus\": \"angemeldet\"}\n\nPublish: no (draft — the owner publishes)\n"
+    }
+  ],
+  "tools": [
+    {
+      "id": "kurs-ausgebucht-pruefen",
+      "purpose": "Prüft bei jeder neuen Anmeldung, ob die maximale Teilnehmerzahl des Kurses erreicht ist. Wenn die Anzahl der aktiven Anmeldungen (Status 'angemeldet') gleich oder größer als max_teilnehmer ist, wird der Kursstatus auf 'ausgebucht' gesetzt."
+    },
+    {
+      "id": "anmeldestatus-initialisieren",
+      "purpose": "Setzt den Anmeldestatus einer neuen Anmeldung auf 'angemeldet', falls die maximale Teilnehmerzahl noch nicht erreicht ist, andernfalls auf 'warteliste'. Diese Logik ergänzt den auf der öffentlichen Seite voreingestellten Wert durch serverseitige Prüfung."
+    },
+    {
+      "id": "kurs-wieder-oeffnen",
+      "purpose": "Wenn eine Anmeldung storniert wird und der Kursstatus 'ausgebucht' ist, prüft dieses Tool ob nun wieder Plätze frei sind. Ist die Anzahl aktiver Anmeldungen kleiner als max_teilnehmer, wird der Kursstatus auf 'offen' zurückgesetzt."
+    },
+    {
+      "id": "warteliste-nachruecken",
+      "purpose": "Wenn eine Anmeldung storniert wird und noch Anmeldungen auf der Warteliste existieren, wird die älteste Wartelisten-Anmeldung auf 'angemeldet' gesetzt."
+    },
+    {
+      "id": "abgelaufene-kurse-abschliessen",
+      "purpose": "Läuft täglich und setzt Kurse, deren Startzeit plus Dauer in der Vergangenheit liegt und die noch den Status 'offen' oder 'geplant' haben, auf 'abgesagt'. So bleiben vergangene Kurse nicht dauerhaft als offen sichtbar."
+    }
+  ],
+  "covered_by_platform": [
+    {
+      "wish": "Verwaltung von Kursleitern",
+      "feature": "record_form"
+    },
+    {
+      "wish": "Liste aller Kurse einsehen und filtern",
+      "feature": "search_filter"
+    },
+    {
+      "wish": "Liste aller Anmeldungen einsehen",
+      "feature": "list_page"
+    },
+    {
+      "wish": "Anmeldungen nach Kurs oder Status gruppiert anzeigen",
+      "feature": "distribution_view"
+    },
+    {
+      "wish": "Änderungshistorie einer Anmeldung nachvollziehen",
+      "feature": "record_history"
+    },
+    {
+      "wish": "Dokumente oder Dateien zu einem Kurs anhängen",
+      "feature": "record_attachments"
+    },
+    {
+      "wish": "Kursleiter-Foto hochladen",
+      "feature": "record_attachments"
+    }
+  ],
+  "ownership": {
+    "kurse": {
+      "titel": "intent:kurs-anlegen",
+      "yogastil": "intent:kurs-anlegen",
+      "niveau": "intent:kurs-anlegen",
+      "kursleiter": "intent:kurs-anlegen",
+      "startzeit": "intent:kurs-anlegen",
+      "dauer_minuten": "intent:kurs-anlegen",
+      "ort": "intent:kurs-anlegen",
+      "max_teilnehmer": "intent:kurs-anlegen",
+      "preis": "intent:kurs-anlegen",
+      "beschreibung": "intent:kurs-anlegen",
+      "kursstatus": "tool:abgelaufene-kurse-abschliessen"
+    },
+    "anmeldungen": {
+      "anmeldestatus": "tool:warteliste-nachruecken"
+    }
+  },
+  "dashboard": {
+    "focus": [
+      "Offene Kurse mit verbleibenden Plätzen",
+      "Neue Anmeldungen heute",
+      "Ausgebuchte Kurse",
+      "Aktive Kursleiter"
+    ],
+    "hints": [
+      "Kursleiter müssen zuerst angelegt sein, bevor ein Kurs erstellt werden kann.",
+      "Kurse müssen manuell auf 'Anmeldung offen' gesetzt werden, bevor Teilnehmer sich anmelden können.",
+      "Die öffentliche Anmeldeseite erst nach Prüfung freischalten (publish)."
+    ]
+  }
+}

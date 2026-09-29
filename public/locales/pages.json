@@ -1,0 +1,28 @@
+{
+  "pages": {
+    "en": {
+      "Aktive Kursleiter": "Active Instructors",
+      "Anmeldung erfassen": "Record Registration",
+      "Anmeldung öffnen": "Open Registration",
+      "Ausgebucht": "Fully Booked",
+      "Heute keine Kurse geplant.": "No classes scheduled for today.",
+      "Heute noch keine Anmeldungen eingegangen.": "No registrations received today.",
+      "Keine Kurse in den nächsten 7 Tagen.": "No classes in the next 7 days.",
+      "Kommende Kurse": "Upcoming Classes",
+      "Kurs": "Class",
+      "Kurs planen": "Schedule Class",
+      "Neue Anmeldungen heute": "New Registrations Today",
+      "Neuer Kurs": "New Class",
+      "Offen": "Open",
+      "Offene Kurse": "Open Classes",
+      "Unbekannt": "Unknown",
+      "startet {0} — Anmeldung noch nicht geöffnet.": "starts {0} — Registration not yet open.",
+      "{0} Kurs heute — Kursleiter: {1}": "{0} Class today — Instructor: {1}",
+      "{0} Kurse heute — Kursleiter: {1}": "{0} Classes today — Instructor: {1}",
+      "{0} — Anmeldung geöffnet": "{0} — Registration Open",
+      "{0} — verschoben": "{0} — postponed",
+      "Öffnen": "Open"
+    }
+  },
+  "v": 1
+}

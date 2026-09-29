@@ -1,0 +1,22 @@
+{
+  "entities": {
+    "Kursleiter": {
+      "placeholders_set": 7,
+      "defaults_keys": ["status"],
+      "computed_keys": [],
+      "reason": "Reine Stammdaten für Yoga-Lehrer. Keine Number-Felder, keine applookup mit Preisen, keine Datumpaar-Berechnung. Nur Status-Lookup mit Standard-Value 'aktiv'."
+    },
+    "Kurse": {
+      "placeholders_set": 11,
+      "defaults_keys": ["startzeit", "dauer_minuten", "max_teilnehmer", "kursstatus"],
+      "computed_keys": [],
+      "reason": "Yoga-Kurse mit Zeitplan. Zwar Number-Felder (Dauer, Teilnehmerzahl, Preis) und applookup auf Kursleiter vorhanden, aber kein Preis-Target bei Kursleiter und keine Berechnung sinnvoll (Preis ist pro Kurs, nicht abhängig von Dauer oder Kapazität). Keine Computeds notwendig."
+    },
+    "Anmeldungen": {
+      "placeholders_set": 10,
+      "defaults_keys": ["anmeldedatum", "teilnahmebedingungen"],
+      "computed_keys": [],
+      "reason": "Anmeldungen für Yoga-Kurse. Entity trägt die Markierung 'Anmeldung', applookup auf Kurse mit Preis-Target vorhanden, aber keine Multiplikator-Felder (Menge, Tage, Stunden) und kein Datumspaar (nur Erfassungsdatum, kein Aufenthalts-Zeitraum). Daher keine Gesamtkosten-Berechnung sinnvoll. Anmeldedatum heute, Bedingungen unchecked."
+    }
+  }
+}
