@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "pages": [
+    {
+      "slug": "kursangebot",
+      "component": "Kursangebot",
+      "title": "Kursangebot",
+      "endpoints": [
+        {
+          "entity": "kurse",
+          "op": "list",
+          "fields": [
+            "titel",
+            "yogastil",
+            "niveau",
+            "kursleiter",
+            "startzeit",
+            "dauer_minuten",
+            "ort",
+            "preis",
+            "max_teilnehmer"
+          ],
+          "scope": "r.v_kursstatus == 'offen'",
+          "scope_description": "Zeigt nur Kurse mit Kursstatus = offen",
+          "max_records": 500
+        }
+      ]
+    },
+    {
+      "slug": "kurs-anmeldung",
+      "component": "KursAnmeldung",
+      "title": "Kursanmeldung",
+      "endpoints": [
+        {
+          "entity": "kurse",
+          "op": "list",
+          "fields": [
+            "titel",
+            "yogastil",
+            "niveau",
+            "startzeit",
+            "ort",
+            "preis"
+          ],
+          "scope": "r.v_kursstatus == 'offen'",
+          "scope_description": "zeigt nur Kurse mit Kursstatus = offen",
+          "max_records": 100
+        },
+        {
+          "entity": "anmeldungen",
+          "op": "create",
+          "fields": [
+            "kurs",
+            "teilnehmer_firstname",
+            "teilnehmer_lastname",
+            "email",
+            "telefon",
+            "erfahrung",
+            "gesundheitshinweise",
+            "bemerkungen",
+            "teilnahmebedingungen",
+            "anmeldedatum"
+          ],
+          "preset_fields": {
+            "anmeldestatus": "angemeldet"
+          }
+        }
+      ]
+    }
+  ]
+}

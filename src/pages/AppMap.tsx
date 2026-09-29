@@ -37,7 +37,7 @@ const SLOW: LineChannel[] = ['tool', 'page'];
 const AGENT_MINUTES = 3;
 const JobsContext = createContext<Record<string, LineJob>>({});
 
-type SaveState = { status: 'idle' } | { status: 'saving' } | { status: 'saved'; channel: LineChannel } | { status: 'error'; message: string };
+type SaveState = { kind: 'idle' } | { kind: 'saving' } | { kind: 'saved'; channel: LineChannel } | { kind: 'error'; message: string };
 type Toast = { id: number; text: string; bad?: boolean; actions?: { label: string; clock?: boolean; fn: () => void }[] };
 
 const SCHEDULE_PRESETS: { value: string; label: () => string }[] = [
@@ -136,18 +136,18 @@ export default function AppMap() {
 
   const setState = (id: string, s: SaveState) => setStates(prev => ({ ...prev, [id]: s }));
   const run = async (line: MapLine, call: () => ReturnType<typeof answerLine>) => {
-    setState(line.id, { status: 'saving' });
+    setState(line.id, { kind: 'saving' });
     try {
       const res = await call();
       setSt(prev => prev ? { ...prev, map: res.map, planVersion: res.plan_version ?? prev.planVersion, changes: res.changes ?? prev.changes } : prev);
-      setState(line.id, { status: 'saved', channel: res.action.channel });
+      setState(line.id, { kind: 'saved', channel: res.action.channel });
       const change = res.changes?.[0];
       if (change?.undo && (res.action.channel === 'policy' || res.action.channel === 'trigger')) {
         toast(t('da_changed', { text: change.text }), [{ label: t('da_undo_short'), fn: () => undo(change) }], false, 10000);
       }
       if (SLOW.includes(res.action.channel)) reload();
     } catch (e) {
-      setState(line.id, { status: 'error', message: e instanceof Error ? e.message : String(e) });
+      setState(line.id, { kind: 'error', message: e instanceof Error ? e.message : String(e) });
     }
   };
   const save = (line: MapLine, value: unknown) => run(line, () => answerLine(line.id, value));
@@ -212,7 +212,7 @@ function MainView({ st, lines, pending, focus, decisions, states, dismissed, onS
       {(summary || tasks) && (
         <p className="max-w-prose text-sm text-muted-foreground">{summary && firstSentences(summary.text, 2)}{tasks && ` ${tasks.text}.`}</p>
       )}
-      {card && <DecisionCard line={card} state={states[card.id] ?? { status: 'idle' }} onFits={() => onFits(card)} onSave={v => onSave(card, v)} onUpload={f => onUpload(card, f)} />}
+      {card && <DecisionCard line={card} state={states[card.id] ?? { kind: 'idle' }} onFits={() => onFits(card)} onSave={v => onSave(card, v)} onUpload={f => onUpload(card, f)} />}
       {jobs.length > 0 && (
         <div className="rounded-2xl border border-border bg-card px-5 py-3">
           {jobs.map(j => (
@@ -247,7 +247,7 @@ function DecisionCard({ line, state, onFits, onSave, onUpload }: { line: MapLine
   const [other, setOther] = useState(false);
   const [why, setWhy] = useState(false);
   useEffect(() => { setOther(false); }, [line.id]);
-  const busy = state.status === 'saving';
+  const busy = state.kind === 'saving';
   const e = line.editable;
   return (
     <div id={`line-${line.id}`} className="rounded-2xl border border-border bg-card px-5 py-4 shadow-sm">
@@ -429,7 +429,7 @@ function AllView({ lines, minor, limits, focus, states, onSave, onUpload, onFits
         <section>
           <h3 className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('da_minor_title')}</h3>
           <ul className="divide-y divide-border rounded-2xl border border-border bg-card">
-            {minor.map(line => <li key={line.id} id={`line-${line.id}`} className="px-5 py-3"><DecisionRow line={line} state={states[line.id] ?? { status: 'idle' }} onSave={v => onSave(line, v)} onUpload={f => onUpload(line, f)} onFits={() => onFits(line)} /></li>)}
+            {minor.map(line => <li key={line.id} id={`line-${line.id}`} className="px-5 py-3"><DecisionRow line={line} state={states[line.id] ?? { kind: 'idle' }} onSave={v => onSave(line, v)} onUpload={f => onUpload(line, f)} onFits={() => onFits(line)} /></li>)}
           </ul>
         </section>
       )}
@@ -483,8 +483,8 @@ function ToolView({ id, lines, changes, focus, states, onSave, onUpload, goView 
         {editable.map(line => (
           <li key={line.id} id={`line-${line.id}`} className={`px-5 py-3 ${focus === line.id ? 'ring-2 ring-primary/40' : ''}`}>
             <p className="mb-2 text-sm font-medium">{line.text}</p>
-            <LineEditor line={line} state={states[line.id] ?? { status: 'idle' }} onSave={v => onSave(line, v)} onUpload={f => onUpload(line, f)} />
-            <StateLine state={states[line.id] ?? { status: 'idle' }} />
+            <LineEditor line={line} state={states[line.id] ?? { kind: 'idle' }} onSave={v => onSave(line, v)} onUpload={f => onUpload(line, f)} />
+            <StateLine state={states[line.id] ?? { kind: 'idle' }} />
           </li>
         ))}
         {facts.map(line => <li key={line.id} className="px-5 py-2.5 text-sm text-muted-foreground">{line.text}</li>)}
@@ -531,8 +531,8 @@ function HistoryView({ changes, onUndo, goView }: { changes: PlanChange[]; onUnd
 /* ── shared pieces ────────────────────────────────────────────────────── */
 
 function StateLine({ state }: { state: SaveState }) {
-  if (state.status === 'saving') return <p className="text-xs text-muted-foreground">{t('am_saving')}</p>;
-  if (state.status === 'error') return <p role="alert" className="flex items-center gap-1 text-xs text-destructive"><IconAlertCircle size={14} aria-hidden="true" />{state.message}</p>;
+  if (state.kind === 'saving') return <p className="text-xs text-muted-foreground">{t('am_saving')}</p>;
+  if (state.kind === 'error') return <p role="alert" className="flex items-center gap-1 text-xs text-destructive"><IconAlertCircle size={14} aria-hidden="true" />{state.message}</p>;
   return null;
 }
 
@@ -553,7 +553,7 @@ function JobBadge({ lineId, block }: { lineId: string; block?: boolean }) {
 
 function DecisionRow({ line, state, onSave, onUpload, onFits }: { line: MapLine; state: SaveState; onSave: (v: unknown) => void; onUpload: (f: File) => void; onFits: () => void }) {
   const [edit, setEdit] = useState(false);
-  const busy = state.status === 'saving';
+  const busy = state.kind === 'saving';
   const e = line.editable;
   return (
     <div className="space-y-2">
@@ -583,7 +583,7 @@ function LineEditor({ line, state, onSave, onUpload }: { line: MapLine; state: S
   const slow = SLOW.includes(e.channel);
   const job = jobFor(jobs, line.id);
   const blocked = job?.status === 'running';
-  const busy = state.status === 'saving' || blocked;
+  const busy = state.kind === 'saving' || blocked;
   const name = line.about?.label ? toolName(line.about.label, line.about.id) : line.about?.id ?? '';
   const armed = pending !== undefined || file !== null;
   const go = () => { if (file) { onUpload(file); setFile(null); } else if (pending !== undefined) { onSave(pending); setPending(undefined); } };
